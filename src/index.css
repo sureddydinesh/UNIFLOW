@@ -1,0 +1,644 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root,
+  [data-theme="light"],
+  html.light,
+  html:not(.dark) {
+    /* Exact Light Mode Palette (Req 1) */
+    --color-bg: #F5F7FC;
+    --color-sidebar: #FFFFFF;
+    --color-card: #FFFFFF;
+    --color-surface-secondary: #F0F2FA;
+    --color-elevated: #F0F2FA;
+    --color-primary: #6558E8;
+    --color-primary-hover: #5748D5;
+    --color-primary-soft: #F0EDFF;
+    --color-emerald: #15803D;
+    --color-text-main: #172033;
+    --color-text-secondary: #64748B;
+    --color-text-muted: #8490A5;
+    --color-border: #E1E6F0;
+    --color-warning: #B7791F;
+    --color-error: #DC2626;
+    --scrollbar-thumb: #CBD5E1;
+    --scrollbar-track: #F0F2FA;
+    --glow-primary-rgb: 101, 88, 232;
+    --color-card-hover: #FFFFFF;
+    --color-elevated-hover: #E9ECF5;
+    --color-nav-hover: rgba(101, 88, 232, 0.08);
+    color-scheme: light;
+  }
+
+  html.dark,
+  [data-theme="dark"] {
+    /* Theme B: Midnight Intelligence (Dark Mode - Default) */
+    --color-bg: #0B1020;
+    --color-sidebar: #111827;
+    --color-card: #182235;
+    --color-surface-secondary: #222F45;
+    --color-elevated: #222F45;
+    --color-primary: #8B80FF;
+    --color-primary-hover: #7468F0;
+    --color-primary-soft: rgba(139, 128, 255, 0.15);
+    --color-emerald: #34D399;
+    --color-text-main: #F8FAFC;
+    --color-text-secondary: #A8B3C7;
+    --color-text-muted: #A8B3C7;
+    --color-border: #2A3548;
+    --color-warning: #FBBF24;
+    --color-error: #F87171;
+    --scrollbar-thumb: #30394D;
+    --scrollbar-track: #111827;
+    --glow-primary-rgb: 139, 128, 255;
+    --color-card-hover: #1D2A42;
+    --color-elevated-hover: #293852;
+    --color-nav-hover: rgba(139, 128, 255, 0.09);
+    color-scheme: dark;
+  }
+
+  * {
+    border-color: var(--color-border);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text-main);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  /* Global focus-visible outline: keyboard accessible, not mouse */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  /* Tabular figures for financial amounts and timers */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Premium input focus styles */
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(139, 128, 255, 0.25);
+    border-color: var(--color-primary) !important;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+
+  html:not(.dark) input:focus,
+  html:not(.dark) select:focus,
+  html:not(.dark) textarea:focus {
+    box-shadow: 0 0 0 2px rgba(99, 91, 219, 0.2);
+    border-color: var(--color-primary) !important;
+  }
+
+  /* Selection color */
+  ::selection {
+    background-color: rgba(139, 128, 255, 0.25);
+    color: var(--color-text-main);
+  }
+
+  /* Custom scrollbars */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+  }
+}
+
+/* ─────────────────────────────────────────
+   REUSABLE HOVER INTERACTION SYSTEM
+   Uses box-shadow for glow — zero layout shift.
+   CSS vars make it theme-aware automatically.
+   Follows UniFlow violet accent (#8B80FF / #635BDB).
+───────────────────────────────────────── */
+
+:root {
+  --glow-primary-rgb: 101, 88, 232;      /* light mode violet #6558E8 */
+  --color-card-hover: #FFFFFF;
+  --color-elevated-hover: #F0F2FA;
+  --color-nav-hover: rgba(101, 88, 232, 0.07);
+}
+html.dark {
+  --glow-primary-rgb: 139, 128, 255;    /* dark: UniFlow violet #8B80FF */
+  --color-card-hover: #1D2A42;          /* slightly brighter navy on hover */
+  --color-elevated-hover: #293852;
+  --color-nav-hover: rgba(139, 128, 255, 0.09);
+}
+
+/* ── 1. DASHBOARD & PANEL CARDS (Summary metrics, Today's Schedule, Spending Share, etc.) ── */
+.card-hover {
+  border: 1px solid var(--color-border);
+  transition:
+    border-color 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, box-shadow, border-color;
+}
+
+@media (hover: hover) {
+  .card-hover:hover {
+    border-color: rgba(var(--glow-primary-rgb), 0.5) !important;
+    background-color: var(--color-card-hover) !important;
+    box-shadow:
+      0 0 0 1px rgba(var(--glow-primary-rgb), 0.2),
+      0 4px 16px -3px rgba(var(--glow-primary-rgb), 0.16),
+      0 8px 24px -6px rgba(0, 0, 0, 0.06) !important;
+    transform: translateY(-2.5px);
+  }
+  html.dark .card-hover:hover {
+    border-color: rgba(var(--glow-primary-rgb), 0.6) !important;
+    box-shadow:
+      0 0 0 1px rgba(var(--glow-primary-rgb), 0.2),
+      0 4px 20px -3px rgba(var(--glow-primary-rgb), 0.22),
+      0 12px 32px -8px rgba(0, 0, 0, 0.32) !important;
+  }
+}
+
+.card-hover:focus-visible {
+  border-color: rgba(var(--glow-primary-rgb), 0.7);
+  box-shadow: 0 0 0 2px rgba(var(--glow-primary-rgb), 0.35);
+  outline: none;
+}
+
+/* ── 2. ROW ITEMS (Schedule rows, assignment rows, transaction rows) ── */
+.row-hover {
+  border: 1px solid var(--color-border);
+  transition:
+    border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, box-shadow, border-color;
+}
+
+@media (hover: hover) {
+  .row-hover:hover {
+    border-color: rgba(var(--glow-primary-rgb), 0.5) !important;
+    background-color: rgba(var(--glow-primary-rgb), 0.06) !important;
+    box-shadow:
+      0 0 0 1px rgba(var(--glow-primary-rgb), 0.16),
+      0 3px 14px -3px rgba(var(--glow-primary-rgb), 0.14) !important;
+    transform: translateY(-1.5px);
+  }
+
+  .row-hover:hover .row-time-badge {
+    transform: scale(1.04);
+    box-shadow: 0 0 10px -2px rgba(var(--glow-primary-rgb), 0.3);
+  }
+
+  .row-hover:hover .row-icon {
+    color: var(--color-primary);
+  }
+}
+
+.row-hover:focus-visible {
+  border-color: rgba(var(--glow-primary-rgb), 0.7);
+  box-shadow: 0 0 0 2px rgba(var(--glow-primary-rgb), 0.35);
+  outline: none;
+}
+
+/* Override for conflict/overdue rows — keep their warning tone with enhanced glow */
+.row-hover.row-conflict:hover {
+  border-color: rgba(251, 191, 36, 0.7) !important;
+  box-shadow:
+    0 0 0 1px rgba(251, 191, 36, 0.22),
+    0 3px 14px -3px rgba(251, 191, 36, 0.18) !important;
+  background-color: rgba(251, 191, 36, 0.07) !important;
+}
+
+.row-hover.row-overdue:hover {
+  border-color: rgba(248, 113, 113, 0.7) !important;
+  box-shadow:
+    0 0 0 1px rgba(248, 113, 113, 0.22),
+    0 3px 14px -3px rgba(248, 113, 113, 0.18) !important;
+  background-color: rgba(248, 113, 113, 0.07) !important;
+}
+
+/* ── 3. SIDEBAR NAV ITEMS ── */
+.nav-item-hover {
+  border: 1px solid transparent;
+  transition:
+    background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, border-color, box-shadow;
+}
+
+@media (hover: hover) {
+  .nav-item-hover:not(.nav-item-active):hover {
+    border-color: rgba(var(--glow-primary-rgb), 0.45);
+    background-color: var(--color-nav-hover);
+    color: var(--color-text-main);
+    box-shadow:
+      0 0 0 1px rgba(var(--glow-primary-rgb), 0.18),
+      0 3px 12px -3px rgba(var(--glow-primary-rgb), 0.18);
+    transform: translateX(3px);
+  }
+
+  .nav-item-hover:not(.nav-item-active):hover .nav-icon {
+    color: var(--color-primary);
+    background-color: rgba(var(--glow-primary-rgb), 0.16);
+    transform: scale(1.06);
+  }
+
+  .nav-item-hover:not(.nav-item-active):hover .nav-label {
+    color: #D3CEFF;
+  }
+
+  html:not(.dark) .nav-item-hover:not(.nav-item-active):hover .nav-label {
+    color: var(--color-primary);
+  }
+}
+
+.nav-item-hover:focus-visible {
+  border-color: rgba(var(--glow-primary-rgb), 0.7);
+  box-shadow: 0 0 0 2px rgba(var(--glow-primary-rgb), 0.35);
+  outline: none;
+}
+
+/* Active navigation item — permanently distinct from ordinary hovered item */
+.nav-item-active {
+  background: linear-gradient(90deg, rgba(var(--glow-primary-rgb), 0.15), rgba(var(--glow-primary-rgb), 0.05)) !important;
+  border-color: rgba(var(--glow-primary-rgb), 0.5) !important;
+  box-shadow:
+    0 0 16px -3px rgba(var(--glow-primary-rgb), 0.25),
+    inset 0 0 0 1px rgba(var(--glow-primary-rgb), 0.2) !important;
+  color: var(--color-primary) !important;
+  position: relative;
+}
+
+.nav-item-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 22%;
+  bottom: 22%;
+  width: 3.5px;
+  background-color: var(--color-primary);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 8px var(--color-primary);
+}
+
+.nav-item-active .nav-icon {
+  background-color: rgba(var(--glow-primary-rgb), 0.2);
+  color: var(--color-primary);
+}
+
+.nav-item-active .nav-label {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ── 4. ACTION BUTTONS (Quick Action, Assignment, Event, Expense) ── */
+.btn-action {
+  transition:
+    background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.12s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, box-shadow;
+}
+
+@media (hover: hover) {
+  .btn-action:hover:not(:disabled) {
+    border-color: rgba(var(--glow-primary-rgb), 0.6);
+    box-shadow:
+      0 0 0 1px rgba(var(--glow-primary-rgb), 0.25),
+      0 4px 18px -3px rgba(var(--glow-primary-rgb), 0.28);
+    transform: translateY(-1.5px);
+  }
+}
+
+.btn-action:active:not(:disabled) {
+  transform: scale(0.965);
+}
+
+.btn-action:focus-visible {
+  border-color: rgba(var(--glow-primary-rgb), 0.7);
+  box-shadow: 0 0 0 2px rgba(var(--glow-primary-rgb), 0.4);
+  outline: none;
+}
+
+.btn-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ── 5. SECTION PANELS (no elevation, just border glow for non-interactive panels) ── */
+.section-hover {
+  transition:
+    border-color 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .section-hover:hover {
+    border-color: rgba(var(--glow-primary-rgb), 0.45);
+    box-shadow:
+      0 0 0 1px rgba(var(--glow-primary-rgb), 0.15),
+      0 4px 20px -6px rgba(var(--glow-primary-rgb), 0.15);
+  }
+}
+
+
+
+/* ─────────────────────────────────────────
+   GLASS & GLOW UTILITIES
+───────────────────────────────────────── */
+.glow-primary-sm {
+  box-shadow: 0 0 18px -4px rgba(139, 128, 255, 0.35);
+}
+
+.glow-emerald-sm {
+  box-shadow: 0 0 18px -4px rgba(52, 211, 153, 0.35);
+}
+
+.glass-card {
+  background: rgba(24, 34, 53, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+html:not(.dark) .glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* ─────────────────────────────────────────
+   SURFACE DEPTH (box-shadow hierarchy)
+───────────────────────────────────────── */
+.shadow-card {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 4px 16px -4px rgba(0, 0, 0, 0.12);
+}
+
+html.dark .shadow-card {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25), 0 8px 32px -8px rgba(0, 0, 0, 0.45);
+}
+
+.shadow-modal {
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.2), 0 24px 64px -8px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .shadow-modal {
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.5), 0 24px 64px -8px rgba(0, 0, 0, 0.65);
+}
+
+
+/* ─────────────────────────────────────────
+   SKELETON SHIMMER
+───────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-elevated) 25%,
+    var(--color-border) 50%,
+    var(--color-elevated) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ─────────────────────────────────────────
+   AMBIENT BANNER GRADIENT (DASH-01)
+───────────────────────────────────────── */
+@keyframes ambientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.ambient-banner-gradient {
+  background-size: 200% 200%;
+  animation: ambientShift 20s ease infinite;
+}
+
+/* ─────────────────────────────────────────
+   LIGHT SWEEP EFFECT
+───────────────────────────────────────── */
+@keyframes lightSweep {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(250%); }
+}
+
+.light-sweep-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.light-sweep-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.045) 50%,
+    transparent 80%
+  );
+  transform: translateX(-120%);
+  animation: lightSweep 9s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────
+   BORDER GLOW ON HOVER (PREMIUM CARDS)
+───────────────────────────────────────── */
+.hover-glow-primary {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.hover-glow-primary:hover {
+  box-shadow: 0 0 0 1px rgba(139, 128, 255, 0.3), 0 4px 20px -4px rgba(139, 128, 255, 0.15);
+}
+
+html:not(.dark) .hover-glow-primary:hover {
+  box-shadow: 0 0 0 1px rgba(99, 91, 219, 0.2), 0 4px 20px -4px rgba(99, 91, 219, 0.1);
+}
+
+/* ─────────────────────────────────────────
+   PRIORITY ACCENT BORDERS (LEFT SIDE)
+───────────────────────────────────────── */
+.accent-left-primary {
+  border-left: 3px solid var(--color-primary);
+}
+
+.accent-left-emerald {
+  border-left: 3px solid var(--color-emerald);
+}
+
+.accent-left-error {
+  border-left: 3px solid var(--color-error);
+}
+
+.accent-left-warning {
+  border-left: 3px solid var(--color-warning);
+}
+
+/* ─────────────────────────────────────────
+   METRIC CARD GRADIENT TOP BORDER
+───────────────────────────────────────── */
+.metric-card-accent-violet::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), transparent 70%);
+  border-radius: 24px 24px 0 0;
+  opacity: 0.7;
+}
+
+.metric-card-accent-emerald::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-emerald), transparent 70%);
+  border-radius: 24px 24px 0 0;
+  opacity: 0.7;
+}
+
+.metric-card-accent-sky::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #38BDF8, transparent 70%);
+  border-radius: 24px 24px 0 0;
+  opacity: 0.7;
+}
+
+.metric-card-accent-amber::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-warning), transparent 70%);
+  border-radius: 24px 24px 0 0;
+  opacity: 0.7;
+}
+
+/* ─────────────────────────────────────────
+   MODAL ANIMATION (fallback)
+───────────────────────────────────────── */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-scale-in {
+  animation: fadeInScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ─────────────────────────────────────────
+   BADGE PULSE (notifications)
+───────────────────────────────────────── */
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.4); }
+  50%       { box-shadow: 0 0 0 5px rgba(248, 113, 113, 0); }
+}
+
+.badge-pulse {
+  animation: badgePulse 2s ease infinite;
+}
+
+/* ─────────────────────────────────────────
+   PROGRESS BAR STRIPED (OVER BUDGET)
+───────────────────────────────────────── */
+@keyframes progressStripe {
+  0%   { background-position: 0 0; }
+  100% { background-position: 24px 0; }
+}
+
+.progress-striped {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    rgba(255, 255, 255, 0.08) 6px,
+    rgba(255, 255, 255, 0.08) 12px
+  );
+  background-size: 24px 24px;
+  animation: progressStripe 0.6s linear infinite;
+}
+
+/* ─────────────────────────────────────────
+   HEADER BACKDROP GLASS (AppLayout)
+───────────────────────────────────────── */
+.header-glass {
+  background: rgba(24, 34, 53, 0.85);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+}
+
+html:not(.dark) .header-glass {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+}
+
+/* ─────────────────────────────────────────
+   ACCESSIBILITY: prefers-reduced-motion
+───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ambient-banner-gradient {
+    animation: none !important;
+  }
+  .light-sweep-effect::after {
+    display: none !important;
+  }
+  .skeleton {
+    animation: none !important;
+    background: var(--color-elevated) !important;
+  }
+  .progress-striped {
+    animation: none !important;
+  }
+}
