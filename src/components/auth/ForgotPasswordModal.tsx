@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Modal } from '../common/Modal';
 import { resetPassword } from '../../services/storage';
-import { supabase } from '../../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { sanitizeErrorMessage } from '../../utils/errorSanitizer';
 import { CheckCircle2, AlertCircle, Mail, KeyRound, Loader2, Sparkles, Cloud } from 'lucide-react';
 import { UniFlowLogo } from '../brand/UniFlowLogo';
 
@@ -46,6 +47,12 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
     setError('');
     setIsSubmitting(true);
 
+    if (!isSupabaseConfigured) {
+      setError('Authentication service is not configured on this deployment. Please verify that VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY are configured in your hosting environment.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       // Direct cloud password reset to Supabase Auth with redirect URL
       const redirectUrl = typeof window !== 'undefined' ? window.location.origin : undefined;
@@ -54,7 +61,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
       });
 
       if (resetError) {
-        setError(resetError.message || 'Unable to request password reset. Please try again.');
+        setError(sanitizeErrorMessage(resetError.message));
         setIsSubmitting(false);
         return;
       }
@@ -65,7 +72,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
         message: `Password reset instructions have been sent to ${normalizedEmail}. Check your inbox and follow the link to securely set a new password.`,
       });
     } catch (err: any) {
-      setError(err?.message || 'Network error occurred while connecting to authentication service.');
+      setError(sanitizeErrorMessage(err?.message || 'Network error occurred while connecting to authentication service.'));
     } finally {
       setIsSubmitting(false);
     }

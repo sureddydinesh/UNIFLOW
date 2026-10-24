@@ -110,10 +110,10 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
           <motion.div 
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-4 p-3 text-xs bg-status-error/15 border border-status-error/40 text-status-error rounded-xl flex items-center gap-2"
+            className="mt-4 p-3 text-xs bg-status-error/15 border border-status-error/40 text-status-error rounded-xl flex items-start gap-2.5"
           >
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span className="leading-relaxed">{error}</span>
           </motion.div>
         )}
 

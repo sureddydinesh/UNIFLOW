@@ -16,7 +16,7 @@ import {
   ActiveFocusState,
   Assessment
 } from '../types';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import * as supabaseStorage from '../services/supabaseStorage';
 import * as storage from '../services/storage';
 import { calculateFinancialSummary, calculateAcademicSummary } from '../utils/calculations';
@@ -443,6 +443,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return { success: false, error: 'Password is required.' };
     }
 
+    if (!isSupabaseConfigured) {
+      return {
+        success: false,
+        error: 'Authentication service is not configured on this deployment. Please verify that VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or VITE_SUPABASE_ANON_KEY) are configured in your hosting environment.',
+      };
+    }
+
     // Edge Case B fix: Clear previous demo/cloud state synchronously before login
     isSwitchingToDemoRef.current = false;
     storage.setCurrentUserId(null);
@@ -450,22 +457,30 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     clearUserState();
     setIsLoading(true);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: normalizedEmail,
-      password: pass,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password: pass,
+      });
 
-    if (error) {
+      if (error) {
+        setIsLoading(false);
+        return { success: false, error: sanitizeErrorMessage(error.message) };
+      }
+
+      if (data.user) {
+        activeLoadedUserIdRef.current = data.user.id;
+        loadSupabaseUserData(data.user.id);
+      }
+
+      return { success: true };
+    } catch (err: any) {
       setIsLoading(false);
-      return { success: false, error: error.message };
+      return {
+        success: false,
+        error: sanitizeErrorMessage(err?.message || 'Network error occurred while connecting to authentication service.'),
+      };
     }
-
-    if (data.user) {
-      activeLoadedUserIdRef.current = data.user.id;
-      loadSupabaseUserData(data.user.id);
-    }
-
-    return { success: true };
   };
 
   const register = async (
@@ -486,48 +501,66 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return { success: false, error: 'Password must be at least 6 characters.' };
     }
 
+    if (!isSupabaseConfigured) {
+      return {
+        success: false,
+        error: 'Authentication service is not configured on this deployment. Please add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or VITE_SUPABASE_ANON_KEY) to your hosting environment variables.',
+      };
+    }
+
     // Edge Case B fix: Clear previous state synchronously before register
     isSwitchingToDemoRef.current = false;
     storage.setCurrentUserId(null);
     currentFetchIdRef.current++;
     clearUserState();
 
-    const { data, error } = await supabase.auth.signUp({
-      email: normalizedEmail,
-      password: pass,
-      options: {
-        data: {
-          full_name: trimmedName,
+    try {
+      const siteOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+      const emailRedirectTo = siteOrigin ? `${siteOrigin}/dashboard` : undefined;
+
+      const { data, error } = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password: pass,
+        options: {
+          data: {
+            full_name: trimmedName,
+          },
+          emailRedirectTo,
         },
-      },
-    });
+      });
 
-    if (error) {
-      return { success: false, error: error.message };
-    }
+      if (error) {
+        return { success: false, error: sanitizeErrorMessage(error.message) };
+      }
 
-    if (!data.user) {
-      return { success: false, error: 'Registration failed. Please try again.' };
-    }
+      if (!data.user) {
+        return { success: false, error: 'Registration failed. Please try again.' };
+      }
 
-    // Handle signup states where email confirmation is required and no active session is returned
-    if (!data.session) {
+      // Handle signup states where email confirmation is required and no active session is returned
+      if (!data.session) {
+        return {
+          success: true,
+          userId: data.user.id,
+          needsEmailConfirmation: true,
+          message: 'Account created! Please check your email to confirm your account before logging in.',
+        };
+      }
+
+      activeLoadedUserIdRef.current = data.user.id;
+      loadSupabaseUserData(data.user.id);
+
       return {
         success: true,
         userId: data.user.id,
-        needsEmailConfirmation: true,
-        message: 'Account created! Please check your email to confirm your account before logging in.',
+        needsEmailConfirmation: false,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: sanitizeErrorMessage(err?.message || 'Network connection failed during registration.'),
       };
     }
-
-    activeLoadedUserIdRef.current = data.user.id;
-    loadSupabaseUserData(data.user.id);
-
-    return {
-      success: true,
-      userId: data.user.id,
-      needsEmailConfirmation: false,
-    };
   };
 
   const logout = async (): Promise<void> => {
