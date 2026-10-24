@@ -779,11 +779,8 @@ export function initializeSeedData(): void {
   setStorageItem(STORAGE_KEYS.FOCUS_SETTINGS, { [userAId]: focusSettingsA });
   setStorageItem(STORAGE_KEYS.ASSESSMENTS, assessmentsA);
 
-  // Set default initial session to Aarav Sharma for immediate rich demonstration
-  if (!localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID)) {
-    localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, userAId);
-  }
-
+  // Note: Demo users and seed data are stored in localStorage, but no session is automatically created.
+  // First-time visitors remain unauthenticated so the public landing page is displayed.
   localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
 }
 

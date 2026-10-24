@@ -12,11 +12,13 @@ import { AtmosCtaFooter } from '../landing/AtmosCtaFooter';
 interface LandingPageProps {
   onGoToLogin: () => void;
   onGoToRegister: () => void;
+  onExploreDemo?: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onGoToLogin,
   onGoToRegister,
+  onExploreDemo,
 }) => {
   const { switchDemoUser } = useApp();
   const [selectedShowcaseTab, setSelectedShowcaseTab] = useState<MainProductModuleId>('habit_tracker');
@@ -56,6 +58,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   const handleExploreDemo = () => {
     switchDemoUser('usr_aarav_sharma');
+    onExploreDemo?.();
   };
 
   return (

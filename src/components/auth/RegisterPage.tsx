@@ -18,11 +18,13 @@ import { UniFlowLogo } from '../brand/UniFlowLogo';
 interface RegisterPageProps {
   onGoToLogin: () => void;
   onGoToLanding: () => void;
+  onRegisterSuccess?: () => void;
 }
 
 export const RegisterPage: React.FC<RegisterPageProps> = ({
   onGoToLogin,
   onGoToLanding,
+  onRegisterSuccess,
 }) => {
   const { register } = useApp();
 
@@ -66,8 +68,9 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
       setError(res.error || 'Registration failed. An account may already exist with this email.');
     } else if (res.needsEmailConfirmation) {
       setInfoMessage(res.message || 'Account created! Please check your email to confirm your account before logging in.');
+    } else {
+      onRegisterSuccess?.();
     }
-    // If session returned immediately, App.tsx gates into Onboarding / Dashboard
   };
 
   return (

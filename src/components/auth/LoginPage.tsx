@@ -19,11 +19,13 @@ import { UniFlowLogo } from '../brand/UniFlowLogo';
 interface LoginPageProps {
   onGoToRegister: () => void;
   onGoToLanding: () => void;
+  onLoginSuccess?: () => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({
   onGoToRegister,
   onGoToLanding,
+  onLoginSuccess,
 }) => {
   const { login, switchDemoUser } = useApp();
 
@@ -40,6 +42,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     const res = await login(email, password);
     if (!res.success) {
       setError(res.error || 'Authentication failed. Please verify credentials.');
+    } else {
+      onLoginSuccess?.();
     }
   };
 
@@ -169,7 +173,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 whileHover={{ scale: 1.015 }}
                 whileTap={{ scale: 0.975 }}
                 type="button"
-                onClick={() => switchDemoUser('usr_aarav_sharma')}
+                onClick={() => {
+                  switchDemoUser('usr_aarav_sharma');
+                  onLoginSuccess?.();
+                }}
                 className="w-full py-2.5 rounded-xl bg-elevated border border-border-subtle hover:border-primary/50 text-text-main font-semibold text-xs transition-colors flex items-center justify-center gap-2 hover:bg-card shadow-sm"
               >
                 <Sparkles className="w-4 h-4 text-primary" />
